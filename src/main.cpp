@@ -90,6 +90,33 @@ public:
 struct Field {
     std::vector<ActiveCard> cards;
 };
+// Essentially just a wrapper for vector
+class CardPile {
+private:
+    std::vector<Card> cards;
+public:
+    void append(Card card);
+    Card pop();
+    Card& getFront(); // Why did I make getFront and getBack?
+    Card& getBack();
+    int size(); // There might be a better way of doing this
+    void shuffle();
+};
+
+// Could CardPile and ActivePile be subclasses of some Pile object?
+class ActivePile {
+private:
+    std::vector<Card> cards;
+public:
+    void append(ActiveCard card);
+    Card pop();
+    Card& getFront();
+    Card& getBack();
+    int size(); // There might be a better way of doing this
+    void shuffle();
+};
+// Figure out what you want to use this for later
+// Will probably be the initial 
 class Deck {
 private:
 public:
@@ -98,17 +125,23 @@ struct Player {
     Health health;
     Field field;
     // Wait...Deck does not work here for hand and graveyard, since they do not have ActiveCard
-    Deck deck;
-    Deck hand;
-    Deck graveyard;
+    std::vector<ActiveCard> active;
+    CardPile hand;
+    CardPile graveyard;
 };
 // struct Game {}; // Maybe should be an object
 class Game {
+private:
     Player player1;
     Player player2;
+    bool playerWon;
+public:
+    Game(Deck deck1, Deck deck2);
+    void turn();
 
 };
 
+// Use a while loop for turns; a for each loop might break if the list gets altered
 // Turn has steps
 // Turn
 //  Draw
