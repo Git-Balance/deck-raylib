@@ -87,48 +87,35 @@ public:
     }
     bool isAlive() { return alive; }
 };
-struct Field {
-    std::vector<ActiveCard> cards;
+// Figure out what you want to use this for later
+// Will probably be the initial 
+class Deck {
+private:
+    // Cards originalCards
+    // Cards cardsThatAreDrawn
+public:
 };
-// Essentially just a wrapper for vector
 class CardPile {
 private:
     std::vector<Card> cards;
 public:
     void append(Card card);
-    Card pop();
-    Card& getFront(); // Why did I make getFront and getBack?
-    Card& getBack();
-    int size(); // There might be a better way of doing this
-    void shuffle();
+    Card pop(); // Pop end
+    Card pop(int index);
 };
+/*
+* ActiveDeck contains "deck", hand, and graveyard
+*   These probably can all just be Deck/CardPile bojects
+* Field contains ActiveCards for *both players*
+*   Think of the field as the battlefield where engagements take place
+*/
+class ActiveDeck {
 
-// Could CardPile and ActivePile be subclasses of some Pile object?
-class ActivePile {
-private:
-    std::vector<Card> cards;
-public:
-    void append(ActiveCard card);
-    Card pop();
-    Card& getFront();
-    Card& getBack();
-    int size(); // There might be a better way of doing this
-    void shuffle();
-};
-// Figure out what you want to use this for later
-// Will probably be the initial 
-class Deck {
-private:
-public:
 };
 struct Player {
     Health health;
-    Field field;
-    // Wait...Deck does not work here for hand and graveyard, since they do not have ActiveCard
-    std::vector<ActiveCard> active;
-    CardPile hand;
-    CardPile graveyard;
 };
+class Field {}; 
 // struct Game {}; // Maybe should be an object
 class Game {
 private:
