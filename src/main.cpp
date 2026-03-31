@@ -1,3 +1,4 @@
+#include <list>
 #include <raylib.h>
 #include <string>
 #include <vector>
@@ -26,10 +27,11 @@ enum TargetType {
     Enemy,
 };
 enum TargetPosition {
-    NotPositionable,
-    ActiveFirst,
-    ActiveLast,
-    Random, // Maybe skip this
+    TargetNotPositionable = -1,
+    TargetActiveFirst,
+    TargetActiveLast,
+    TargetRandom, // Maybe skip this
+    TargetPlayer,
 };
 
 struct Target {
@@ -37,10 +39,28 @@ struct Target {
     TargetType position;
 };
 
+
+enum EffectType {
+    Damage,
+    Drain,
+};
+
 // NOTE: Is it effect or Affect
 struct Effect {
+    EffectType type;
+    int effectAmount;
+};
+// "Spell" is a general name for what a card is able to do
+struct Spell {
+    /*
+     * Spell:
+     * <TargetType> <TargetPosition> <EffectType> <EffectAmount>
+     * Ally Player Damage -1
+     * Enemy Mana Damage 1 # Should the mana thing be destroyable
+     * Enemy Mana Drain 1 # 
+     */
     TargetType target;
-    int damage;
+    Effect effect;
 };
 
 struct Card {
@@ -48,8 +68,8 @@ struct Card {
     std::string name;
     int health;
     // Affects
-    Effect effectSummon;
-    Effect effectActive;
+    Spell spellSummon;
+    Spell spellActive;
 };
 
 class Health {
@@ -80,8 +100,8 @@ private:
     bool alive; // A lot of repetition, lol
 public:
     ActiveCard(Card card);
-    Effect summon();
-    Effect turnEffect();
+    Spell summon();
+    Spell turnSpell();
     void damage(int damage) {
         alive = health.damage(damage);
     }
@@ -94,6 +114,8 @@ private:
     // Cards originalCards
     // Cards cardsThatAreDrawn
 public:
+    void addCards(Card baseCard, int numCopies); // Append baseCard numCopies amount of times
+    void addCards(std::list<Card> addCards);
 };
 class CardPile {
 private:
@@ -109,13 +131,19 @@ public:
 * Field contains ActiveCards for *both players*
 *   Think of the field as the battlefield where engagements take place
 */
-class ActiveDeck {
-
-};
+class ActiveCardPile {};
+// For some reason naming this struct "Player" raises the error: Must use 'struct' tag to refer to type 'Player' in this scope
+// EDIT: Turns out the enum thing TargetPosition.Player was causing problems, renaming that fixed it
 struct Player {
     Health health;
 };
-class Field {}; 
+class Field {
+private:
+    Player& player1;
+    Player& player2;
+public:
+    Field(Player& playerA, Player& playerB) : player1(playerA), player2(playerB) {} // Check that the constructor is initializing player1 & 2 correctly, you only just learned how to do this
+}; 
 // struct Game {}; // Maybe should be an object
 class Game {
 private:
