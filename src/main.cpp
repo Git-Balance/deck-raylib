@@ -7,9 +7,9 @@
 * Deck --> Hand, Graveyard
 * Card --> *ActiveCard*
 *   Or should ActiveCard be an object that just has a Card variable inside of it
-* Effect (Target, Damage)
+* Affect (Target, Damage)
 * Trigger (TrigetType)
-*   Skip, effects trigger when card is played/every turn
+*   Skip, affects trigger when card is played/every turn
 * ActiveCard with EnemySingle
 */
 
@@ -40,32 +40,32 @@ struct Target {
 };
 
 
-enum EffectType {
+enum AffectType {
     Damage,
     Drain,
 };
 
-// NOTE: Is it effect or Affect
-struct Effect {
-    EffectType type;
-    int effectAmount;
+struct Affect {
+    AffectType type;
+    int affectAmount;
 };
 // "Spell" is a general name for what a card is able to do
 struct Spell {
     /*
      * Spell:
-     * <TargetType> <TargetPosition> <EffectType> <EffectAmount>
+     * <TargetType> <TargetPosition> <AffectType> <AffectAmount>
      * Ally Player Damage -1
      * Enemy Mana Damage 1 # Should the mana thing be destroyable
      * Enemy Mana Drain 1 # 
      */
     TargetType target;
-    Effect effect;
+    Affect affect;
 };
 
 struct Card {
-    // Health = 0 and an effectSummon is synonymous with a spell card
+    // Health = 0 and an affectSummon is synonymous with a spell card
     std::string name;
+    CardColors colors;
     int health;
     // Affects
     Spell spellSummon;
@@ -95,11 +95,20 @@ public:
 
 class ActiveCard {
 private:
+    std::string name;
     Card stats; // Just for use as "archival" data or whatever
     Health health;
     bool alive; // A lot of repetition, lol
 public:
-    ActiveCard(Card card);
+    ActiveCard(Card card) : health(Health(card.health)) {
+        stats = card;
+        name = card.name;
+        if (health.isDamagable()) {
+            alive = true;
+        } else {
+            alive = false;
+        }
+    }
     Spell summon();
     Spell turnSpell();
     void damage(int damage) {
@@ -112,8 +121,11 @@ public:
 class Deck {
 private:
     // Cards originalCards
-    // Cards cardsThatAreDrawn
+    std::vector<Card> cards;
 public:
+    Deck() {
+        
+    }
     void addCards(Card baseCard, int numCopies); // Append baseCard numCopies amount of times
     void addCards(std::list<Card> addCards);
 };
@@ -121,7 +133,17 @@ class CardPile {
 private:
     std::vector<Card> cards;
 public:
-    void append(Card card);
+    CardPile();
+    void append(Card card) {
+        cards.push_back(card);
+    }
+    // Append baseCard numCopies amount of times
+    void appendCards(Card baseCard, int numCopies) {
+        for (int card; card<numCopies; card++) {
+            append(baseCard);
+        }
+    }
+    void appendCards(std::list<Card> addCards);
     Card pop(); // Pop end
     Card pop(int index);
 };
@@ -130,6 +152,7 @@ public:
 *   These probably can all just be Deck/CardPile bojects
 * Field contains ActiveCards for *both players*
 *   Think of the field as the battlefield where engagements take place
+*   It will not contain, say, a player's hand
 */
 class ActiveCardPile {};
 // For some reason naming this struct "Player" raises the error: Must use 'struct' tag to refer to type 'Player' in this scope
