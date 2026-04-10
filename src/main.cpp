@@ -13,6 +13,15 @@
 * ActiveCard with EnemySingle
 */
 
+/*
+ * A Storage class might be useful
+ *  Stuff like CardPile and ActiveCardPile share a lot of functions like append()
+ *  I could make a class with a template and make CardPile and other stuff be subclasses of it
+ *  However, one of the biggest points of this project is getting it done, and templates have caused "problems" in the past
+ *  So yeah, I am not going to make a Storage class right now
+ *  Just writing down my thoughts
+ */
+
 struct CardColors {
     Color background;
     Color foreground;
@@ -50,6 +59,7 @@ struct Affect {
     int affectAmount;
 };
 // "Spell" is a general name for what a card is able to do
+// TODO: Rename "Spell" to "Action"
 struct Spell {
     /*
      * Spell:
@@ -87,6 +97,10 @@ public:
         this->maxHealth = maxHealth;
         this->currentHealth = maxHealth;
     }
+    Health() {
+        maxHealth = 0;
+        maxHealth = 0;
+    }
     bool damage(int damage) {
         currentHealth -= damage;
         return isAlive();
@@ -116,6 +130,7 @@ public:
     }
     bool isAlive() { return alive; }
 };
+
 // Figure out what you want to use this for later
 // Will probably be the initial 
 class Deck {
@@ -154,25 +169,44 @@ public:
 *   Think of the field as the battlefield where engagements take place
 *   It will not contain, say, a player's hand
 */
-class ActiveCardPile {};
+class ActiveCardPile {
+private:
+    std::vector<ActiveCard> cards;
+public:
+    void append(Card card) {
+        cards.push_back(ActiveCard{card});
+    }
+};
+
 // For some reason naming this struct "Player" raises the error: Must use 'struct' tag to refer to type 'Player' in this scope
 // EDIT: Turns out the enum thing TargetPosition.Player was causing problems, renaming that fixed it
 struct Player {
     Health health;
 };
+struct Team {
+    Player player;
+    ActiveCardPile cards;
+};
 class Field {
 private:
-    Player& player1;
-    Player& player2;
+    Team team1;
+    Team team2;
 public:
-    Field(Player& playerA, Player& playerB) : player1(playerA), player2(playerB) {} // Check that the constructor is initializing player1 & 2 correctly, you only just learned how to do this
+    Field(Player player1, Player player2) {}
+    void addCard(Card card, bool isTeam1) {
+        team1.cards.append(card);
+    }
+    void turn() {
+
+    }
+    bool isFieldEmpty();
+    bool arePlayersAlive(); // Returns true if *both* players are still alive
+    bool isPlayer1Dead();
+    bool isPlayer2Dead();
 }; 
-// struct Game {}; // Maybe should be an object
+
 class Game {
 private:
-    Player player1;
-    Player player2;
-    bool playerWon;
 public:
     Game(Deck deck1, Deck deck2);
     void turn();
