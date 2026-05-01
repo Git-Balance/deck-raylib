@@ -1,3 +1,6 @@
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
 #include <list>
 #include <raylib.h>
 #include <string>
@@ -58,17 +61,16 @@ struct Affect {
     AffectType type;
     int affectAmount;
 };
-// "Spell" is a general name for what a card is able to do
-// TODO: Rename "Spell" to "Action"
-struct Spell {
+// "Action" is a general name for what a card is able to do
+struct Action {
     /*
-     * Spell:
+     * Action:
      * <TargetType> <TargetPosition> <AffectType> <AffectAmount>
      * Ally Player Damage -1
-     * Enemy Mana Damage 1 # Should the mana thing be destroyable
+     * Enemy Mana Damage 1 # Should the mana thing be destroyable?
      * Enemy Mana Drain 1 # 
      */
-    TargetType target;
+    Target target;
     Affect affect;
 };
 
@@ -78,8 +80,8 @@ struct Card {
     CardColors colors;
     int health;
     // Affects
-    Spell spellSummon;
-    Spell spellActive;
+    Action actionSummon;
+    Action actionActive;
 };
 
 class Health {
@@ -123,8 +125,8 @@ public:
             alive = false;
         }
     }
-    Spell summon();
-    Spell turnSpell();
+    Action summon();
+    Action turnAction();
     void damage(int damage) {
         alive = health.damage(damage);
     }
@@ -176,6 +178,9 @@ public:
     void append(Card card) {
         cards.push_back(ActiveCard{card});
     }
+    size_t size() {
+        return cards.size();
+    }
 };
 
 // For some reason naming this struct "Player" raises the error: Must use 'struct' tag to refer to type 'Player' in this scope
@@ -194,10 +199,19 @@ private:
 public:
     Field(Player player1, Player player2) {}
     void addCard(Card card, bool isTeam1) {
-        team1.cards.append(card);
+        if (isTeam1) team1.cards.append(card);
+        else team2.cards.append(card);
     }
     void turn() {
+        // step, act, action, checks (?)
 
+        int team1Actions = team1.cards.size();
+        int team2Actions = team2.cards.size();
+
+        while (std::max(team1Actions, team2Actions) != 0) {
+            assert(std::max(team1Actions, team2Actions) >= 0);
+        
+        }
     }
     bool isFieldEmpty();
     bool arePlayersAlive(); // Returns true if *both* players are still alive
