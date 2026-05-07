@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
+#include <cstdio>
 #include <list>
 #include <raylib.h>
 #include <string>
@@ -171,6 +172,7 @@ public:
 *   Think of the field as the battlefield where engagements take place
 *   It will not contain, say, a player's hand
 */
+/*
 class ActiveCardPile {
 private:
     std::vector<ActiveCard> cards;
@@ -182,6 +184,10 @@ public:
         return cards.size();
     }
 };
+*/
+
+using ActiveCardPile = std::vector<ActiveCard>;
+
 
 // For some reason naming this struct "Player" raises the error: Must use 'struct' tag to refer to type 'Player' in this scope
 // EDIT: Turns out the enum thing TargetPosition.Player was causing problems, renaming that fixed it
@@ -197,20 +203,33 @@ private:
     Team team1;
     Team team2;
 public:
-    Field(Player player1, Player player2) {}
+    Field(Team team1, Team team2) {
+        team1 = team1;
+        team2 = team2;
+    }
     void addCard(Card card, bool isTeam1) {
-        if (isTeam1) team1.cards.append(card);
-        else team2.cards.append(card);
+        if (isTeam1) team1.cards.emplace_back(card);
+        else team2.cards.emplace_back(card);
     }
     void turn() {
         // step, act, action, checks (?)
 
-        int team1Actions = team1.cards.size();
-        int team2Actions = team2.cards.size();
+        int team1Actions = team1.cards.size() - 1;
+        int team2Actions = team2.cards.size() - 1;
 
-        while (std::max(team1Actions, team2Actions) != 0) {
+        while (std::max(team1Actions, team2Actions) >= 0) {
             assert(std::max(team1Actions, team2Actions) >= 0);
-        
+            
+            // For now, just pop the cards into the graveyards
+            // TODO: Add actions and don't just delete cards
+
+            team1.cards.pop_back();
+            team1Actions -= 1;
+            team2.cards.pop_back();
+            team2Actions -= 1;
+            printf("%zu %i\n", team1.cards.size(), team1Actions);
+            printf("%zu %i\n", team2.cards.size(), team2Actions);
+            printf("-----------\n");
         }
     }
     bool isFieldEmpty();
@@ -221,6 +240,7 @@ public:
 
 class Game {
 private:
+    Field field;
 public:
     Game(Deck deck1, Deck deck2);
     void turn();
@@ -236,5 +256,46 @@ public:
 //      Steps (for each ActiveCard pair)
 
 int main() {
+    printf("Start field\n");
+    Field testField = Field(Team(), Team());
+    printf("Start cards\n");
+
+    // testField.addCard(Card(), true);
+    // testField.addCard(Card(), true);
+    // testField.addCard(Card(), true);
+    // testField.addCard(Card(), true);
+    // testField.addCard(Card(), true);
+    // testField.addCard(Card(), true);
+    // testField.addCard(Card(), true);
+    // testField.addCard(Card(), true);
+    // testField.addCard(Card(), false);
+    // testField.addCard(Card(), false);
+    // testField.addCard(Card(), false);
+    // testField.addCard(Card(), false);
+    //
+    printf("Start turn\n");
+    //
+    // testField.turn();
+
+    Card card{};
+    ActiveCard active{card};
+
+    printf("test?\n");
+
+    Player player{};
+    Player player2{};
+
+    Team team1{player, ActiveCardPile{}};
+    Team team2{player2, ActiveCardPile{}};
+
+    Field newField{team1, team2};
+    newField.addCard(card, true);
+    newField.addCard(card, true);
+    newField.addCard(card, true);
+    newField.addCard(card, false);
+    newField.addCard(card, false);
+    newField.turn();
+
+
     return 0;
 }
