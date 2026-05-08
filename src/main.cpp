@@ -194,9 +194,12 @@ using ActiveCardPile = std::vector<ActiveCard>;
 struct Player {
     Health health;
 };
+// A "Team" is just an active player and their stats
 struct Team {
     Player player;
     ActiveCardPile cards;
+    CardPile hand;
+    CardPile graveyard;
 };
 class Field {
 private:
@@ -214,9 +217,9 @@ public:
     void turn() {
         // step, act, action, checks (?)
 
+        // TODO: Get rid of this mess
         int team1Actions = team1.cards.size() - 1;
         int team2Actions = team2.cards.size() - 1;
-
         while (std::max(team1Actions, team2Actions) >= 0) {
             assert(std::max(team1Actions, team2Actions) >= 0);
             
@@ -231,6 +234,16 @@ public:
             printf("%zu %i\n", team2.cards.size(), team2Actions);
             printf("-----------\n");
         }
+
+        // Every step:
+        //  For each team simultaniously:
+        //      If card at currentCard exists && has action:
+        //          Do Action, calculate effects
+        //      Check if card is alive:
+        //          If dead
+        //              Pop card into graveyard (convert from ActiveCard to Card? Could use "stats" variable)
+        //              (wait, is this next calculation necessary?) currentCard{teamNum} -= 1
+        //      currentCard -= 1
     }
     bool isFieldEmpty();
     bool arePlayersAlive(); // Returns true if *both* players are still alive
