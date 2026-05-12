@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <cassert>
-#include <cstddef>
 #include <cstdio>
 #include <list>
 #include <raylib.h>
@@ -26,9 +25,7 @@
  *  Just writing down my thoughts
  */
 
-struct CardColors {
-    Color background;
-    Color foreground;
+struct CardColors { Color background; Color foreground;
     Color text;
     // Temp (mostly) until images for cards are added
     Color imageBackground;
@@ -188,6 +185,13 @@ public:
 
 using ActiveCardPile = std::vector<ActiveCard>;
 
+// Returns true if index can access an element within ActiveCardPile
+bool withinActiveCardPile(const ActiveCardPile& pile, int index) {
+    if (pile.empty()) return false;
+    if (index >= 0 && index < pile.size()) return true;
+    return false;
+}
+
 
 // For some reason naming this struct "Player" raises the error: Must use 'struct' tag to refer to type 'Player' in this scope
 // EDIT: Turns out the enum thing TargetPosition.Player was causing problems, renaming that fixed it
@@ -201,6 +205,11 @@ struct Team {
     CardPile hand;
     CardPile graveyard;
 };
+
+Action getAction(Team team, int cardIndex) {
+    return team.cards.at(cardIndex).turnAction();
+}
+
 class Field {
 private:
     Team team1;
@@ -244,6 +253,14 @@ public:
         //              Pop card into graveyard (convert from ActiveCard to Card? Could use "stats" variable)
         //              (wait, is this next calculation necessary?) currentCard{teamNum} -= 1
         //      currentCard -= 1
+
+        int currentCardTeam1 = team1.cards.size() - 1;
+        int currentCardTeam2 = team2.cards.size() - 1;
+        while (std::max(currentCardTeam1, currentCardTeam2) >= 0) {
+            if (withinActiveCardPile(team1.cards, currentCardTeam1)) {
+                getAction(team1, currentCardTeam1);
+            }
+        }
     }
     bool isFieldEmpty();
     bool arePlayersAlive(); // Returns true if *both* players are still alive
